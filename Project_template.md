@@ -19,8 +19,8 @@
 
 ### 3. Определение доменов и границы контекстов текущего решения
 
-- Домен тепловых датчиков
-- Домен управления отоплением
+- Домен тепловых датчиков - Сбор и мониторинг данных с датичков температуры
+- Домен управления отоплением - Создание, обновление и получение информации о системе отопления. Возможность управления отоплением (включение, выключение)
 
 ### **4. Проблемы текущего монолитного решения**
 
@@ -55,7 +55,10 @@ Person(user, "User", "A user of the smart home system")
 
 System(SmartHomeSystem, "SmartHome System", "System manage heating system control (turn on, turn off, set desire temperature and get current temperature)")
 
+System(TemperatureSensorMonitoring, "Temperature Sensor Monitoring System", "Collect temperature data and send to smart home")
+
 Rel(user, SmartHomeSystem, "Uses the system")
+Rel(TemperatureSensorMonitoring, SmartHomeSystem, "Send data about temperature")
 
 @enduml
 ```
@@ -483,12 +486,18 @@ entity Device {
   *device_id : uuid
   --
   *template_id : uuid
-  owner_id : uuid
   name : varchar
   protocol : varchar
   connection_status : boolean
   registered_at : timestamp
   last_seen : timestamp
+}
+
+entity UserDevice {
+  *user_id : uuid
+  *device_id : uuid
+  --
+  is_owner : boolean
 }
 
 entity DeviceTemplate {
@@ -540,7 +549,8 @@ entity AccessPolicy {
   expires_at : timestamp
 }
 
-User ||--o{ Device
+User ||--o{ UserDevice
+UserDevice }o--|| Device
 Device }o--|| DeviceTemplate
 DeviceTemplate ||--o{ DeviceAction
 DeviceTemplate ||--o{ TelemetryField
